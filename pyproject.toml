@@ -1,0 +1,52 @@
+[project]
+name = "notes2tone"
+version = "0.1.0"
+description = "Optical Music Recognition (OMR) benchmarking framework and tools"
+readme = "README.md"
+requires-python = ">=3.9,<3.13"
+dependencies = [
+    "numpy>=1.24.0,<2.0",
+    "opencv-python>=4.8.0",
+    "datasets>=2.14.0",
+    "pillow>=10.0.0",
+    "tqdm>=4.66.0",
+    "python-dotenv>=1.0.0",
+    "music21>=8.3.0,<10.0.0",
+    "ruff>=0.1.0",
+]
+
+[project.optional-dependencies]
+# GPU support (CUDA 11.x - für GTX 1060/1070/1080, RTX 2000/3000)
+# For CUDA 12.x (RTX 4000+): manually install onnxruntime-gpu>=1.19.0
+gpu = [
+    "onnxruntime-gpu==1.15.1",
+]
+
+# OMR models
+models = [
+    "oemer>=0.1.8",
+]
+
+# Visualization (optional)
+viz = [
+    "matplotlib>=3.7.0",
+]
+
+[tool.setuptools]
+packages = ["benchmarks", "benchmarks.datasets", "benchmarks.models", "benchmarks.converters", "benchmarks.eval"]
+
+[dependency-groups]
+gpu = [
+    "onnxruntime-gpu==1.15.1",
+]
+models = [
+    "oemer>=0.1.8",
+]
+
+[tool.uv]
+# Lock with CUDA 11 as default (most common for GTX 1060/1070/1080, RTX 2000/3000)
+default-groups = ["gpu", "models"]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"

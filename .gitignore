@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.egg-info/
+
+# Virtual Environment
+.venv/
+.env
+
+# IDE
+.vscode/
+
+#Ruff cache
+.ruff_cache/
+
+# Benchmarks Output
+benchmarks/debug/
+benchmarks/results/
+
+# Model outputs
+*.musicxml
+*.xml
+*.mxl
+*.midi
+*.mid
+*.wav
+*.mp3
