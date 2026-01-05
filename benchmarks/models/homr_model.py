@@ -38,16 +38,28 @@ class HomrModel(BaseOMRModel):
     def __init__(
         self,
         homr_path: str = "homr",
+        homr_dir: Optional[str] = None,
         force_cpu: bool = False,
         config: Optional[dict] = None,
     ):
         super().__init__(name="homr", config=config)
         self.homr_path = homr_path
+        self.homr_dir = homr_dir
         self.force_cpu = force_cpu
 
     def _setup(self):
         """Verify that homr is installed and accessible."""
         import shutil
+
+        # If homr_dir is set, we're using poetry run homr
+        if self.homr_dir:
+            homr_dir_path = Path(self.homr_dir)
+            if not homr_dir_path.exists():
+                raise RuntimeError(f"HOMR directory not found: {self.homr_dir}")
+            if not (homr_dir_path / "pyproject.toml").exists():
+                raise RuntimeError(f"Not a valid HOMR repo (missing pyproject.toml): {self.homr_dir}")
+            logger.info(f"Using HOMR from: {self.homr_dir} (poetry run)")
+            return
 
         # Check if homr executable exists in PATH
         homr_executable = shutil.which(self.homr_path)
@@ -82,21 +94,39 @@ class HomrModel(BaseOMRModel):
             input_path = tmp_dir_path / "input.png"
             image.save(input_path)
 
-            # Build command
-            cmd = [self.homr_path, str(input_path)]
-
-            if self.force_cpu:
-                cmd.append("--force-cpu")
+            # Build command based on whether we're using poetry run
+            if self.homr_dir:
+                # Use homr executable directly from the homr venv
+                homr_executable = Path(self.homr_dir) / ".venv" / "bin" / "homr"
+                
+                if not homr_executable.exists():
+                    raise RuntimeError(
+                        f"HOMR executable not found at: {homr_executable}\n"
+                        f"Install HOMR with:\n"
+                        f"  cd {self.homr_dir}\n"
+                        f"  poetry install --only main,gpu"
+                    )
+                
+                cmd = [str(homr_executable), str(input_path)]
+                if self.force_cpu:
+                    cmd.append("--force-cpu")
+                run_cwd = str(tmp_dir_path)
+            else:
+                # Use direct homr command
+                cmd = [self.homr_path, str(input_path)]
+                if self.force_cpu:
+                    cmd.append("--force-cpu")
+                run_cwd = str(tmp_dir_path)
 
             # Execute homr
-            logger.debug(f"Running command: {' '.join(cmd)}")
+            logger.debug(f"Running command: {' '.join(cmd)} (cwd: {run_cwd})")
             try:
                 result = subprocess.run(
                     cmd,
                     capture_output=True,
                     text=True,
                     timeout=480,  # 8 minute timeout
-                    cwd=str(tmp_dir_path),
+                    cwd=run_cwd,
                 )
 
                 if result.returncode != 0:
