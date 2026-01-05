@@ -70,9 +70,13 @@ poetry install --only main      # for CPU only
 
 **Audiveris:**
 - Windows: Download .msi from [releases](https://github.com/Audiveris/audiveris/releases)
-- Linux: Download .deb or use Flatpak from [Flathub](https://flathub.org/apps/org.audiveris.audiveris)
+- Linux: use install script to install localy or download .deb or use Flatpak from [Flathub](https://flathub.org/apps/org.audiveris.audiveris)
+   ```bash
+   chmod +x audiveris_setup.sh
+   ./audiveris_setup.sh
+   ```
 - macOS: Download .dmg from releases
-- Requires Java 11+ ([download here](https://adoptium.net/))
+- Build it yourselfe: Requires Java 11+ ([download here](https://adoptium.net/))
 
 ### 5. Browse Dataset
 
