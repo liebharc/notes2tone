@@ -56,25 +56,6 @@ python -m benchmarks.benchmark --models oemer --limit 10
 python dataset_viewer.py
 ```
 
-## Run Jupyter Notebook
-
-### 1. Install Jupyter Kernel
-
-```bash
-uv sync --extra models
-uv pip install ipykernel onnxruntime-gpu>=1.19.0
-```
-
-### 2. Register the Kernel
-
-```bash
-uv run python -m ipykernel install --user --name notes2tone --display-name "notes2tone (uv)"
-```
-
-### 3. Select the Kernel in Jupyter Notebook
-
-Open your notebook, then click the kernel selector in the top-right corner (e.g., “Python 3 (ipykernel)”) and choose notes2tone (uv).
-
 ## Project Structure
 
 ```
@@ -105,7 +86,8 @@ Register in `benchmarks/benchmark.py`.
 
 **GPU not working:**
 ```bash
-nvidia-smi             # Verify GPU
+nvidia-smi
+nvtop
 ```
 
 **HF authentication error:** Check `.env` file and dataset access request
