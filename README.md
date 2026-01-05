@@ -2,17 +2,10 @@
 
 OMR benchmarking framework for evaluating music score transcription models on the PRAIG/SMB dataset.
 
-## Features
-
-- Benchmark OMR models with OMR-NED metrics
-- Custom MusicXML → **kern converter
-- GPU acceleration (CUDA 11.x support)
-- Interactive dataset browser
 
 ## Requirements
 
-- Python 3.9+
-- NVIDIA GPU with CUDA 11.8 (optional, for GPU acceleration)
+- Python 3.10+
 - HuggingFace account for dataset access
 
 ## Quick Start
@@ -20,18 +13,20 @@ OMR benchmarking framework for evaluating music score transcription models on th
 ### 1. Installation
 
 ```bash
-# Install uv if needed
-pip install uv
+# Create Python 3.10 environment
+python3.10 -m venv .venv
+source .venv/bin/activate  # Linux/Mac
+# or: .venv\Scripts\activate  # Windows
 
-# For GPU (CUDA 11.x - GTX 1060/1070/1080, RTX 2000/3000)
-uv sync --extra gpu --extra models
+# Install dependencies
+# for cuda12
+pip install -e ".[gpu-cuda12]"
 
-# For CUDA 12.x (RTX 4000+)
-uv sync --extra models
-uv pip install onnxruntime-gpu>=1.19.0
+# for cuda11
+pip install -e ".[gpu-cuda11]"
 
-# CPU only
-uv sync --extra models
+#for cpu
+pip install -e ".[cpu]"
 ```
 
 ### 2. Setup HuggingFace
@@ -61,7 +56,7 @@ python -m benchmarks.benchmark --models audiveris --limit 5
 
 **OeMeR:**
 ```bash
-uv pip install oemer
+pip install oemer
 ```
 
 **homr:**
@@ -71,9 +66,6 @@ git clone https://github.com/liebharc/homr
 cd homr
 poetry install --only main,gpu  # for GPU
 poetry install --only main      # for CPU only
-
-# Make sure 'homr' command is accessible in PATH
-# or specify path: --models homr --homr-path /path/to/homr
 ```
 
 **Audiveris:**

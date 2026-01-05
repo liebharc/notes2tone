@@ -9,9 +9,6 @@ __pycache__/
 # IDE
 .vscode/
 
-#Ruff cache
-.ruff_cache/
-
 # Benchmarks Output
 benchmarks/debug/
 benchmarks/results/
