@@ -47,10 +47,42 @@ Request access: https://huggingface.co/datasets/PRAIG/SMB
 ### 3. Run Benchmark
 
 ```bash
-python -m benchmarks.benchmark --models oemer --limit 10
+# Benchmark all models
+python -m benchmarks.benchmark --models all --limit 10
+
+# Benchmark specific models
+python -m benchmarks.benchmark --models oemer homr --limit 10
+
+# Benchmark with Audiveris
+python -m benchmarks.benchmark --models audiveris --limit 5
 ```
 
-### 4. Browse Dataset
+### 4. Model Installation
+
+**OeMeR:**
+```bash
+uv pip install oemer
+```
+
+**homr:**
+```bash
+# Clone and install with Poetry
+git clone https://github.com/liebharc/homr
+cd homr
+poetry install --only main,gpu  # for GPU
+poetry install --only main      # for CPU only
+
+# Make sure 'homr' command is accessible in PATH
+# or specify path: --models homr --homr-path /path/to/homr
+```
+
+**Audiveris:**
+- Windows: Download .msi from [releases](https://github.com/Audiveris/audiveris/releases)
+- Linux: Download .deb or use Flatpak from [Flathub](https://flathub.org/apps/org.audiveris.audiveris)
+- macOS: Download .dmg from releases
+- Requires Java 11+ ([download here](https://adoptium.net/))
+
+### 5. Browse Dataset
 
 ```bash
 python dataset_viewer.py
@@ -75,12 +107,18 @@ uv run python -m ipykernel install --user --name notes2tone --display-name "note
 
 Open your notebook, then click the kernel selector in the top-right corner (e.g., “Python 3 (ipykernel)”) and choose notes2tone (uv).
 
+## Supported OMR Models
+
+- **OeMeR** - End-to-end deep learning model (default)
+- **homr** - Hybrid model combining UNet segmentation + Transformer
+- **Audiveris** - Mature hybrid system (traditional CV + neural networks)
+
 ## Project Structure
 
 ```
 benchmarks/
 ├── datasets/      # Dataset loaders (SMB)
-├── models/        # OMR model wrappers (OeMeR)
+├── models/        # OMR model wrappers (OeMeR, homr, Audiveris)
 ├── converters/    # MusicXML → **kern
 ├── eval/          # OMR-NED metrics
 └── benchmark.py   # Main CLI
