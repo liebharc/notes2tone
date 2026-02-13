@@ -8,38 +8,114 @@ OMR benchmarking framework for evaluating music score transcription models on th
 - Python 3.10+
 - HuggingFace account for dataset access
 
-## Quick Start
+## Installation
 
-### 1. Installation
+### 1. Clone notes2tone Repository
 
 ```bash
-# Create Python 3.10 environment
-python3.10 -m venv .venv
-source .venv/bin/activate  # Linux/Mac
-# or: .venv\Scripts\activate  # Windows
-
-# Install dependencies
-# for cuda12
-pip install -e ".[gpu-cuda12]"
-
-# for cuda11
-pip install -e ".[gpu-cuda11]"
-
-#for cpu
-pip install -e ".[cpu]"
+git clone https://github.com/yourusername/notes2tone.git
+cd notes2tone
 ```
 
-### 2. Setup HuggingFace
+### 2. Create Conda Environment
 
-Create `.env` file:
+```bash
+conda create -n notes2tone python=3.12 -y
+conda activate notes2tone
+```
+
+### 3. Install notes2tone
+
+```bash
+cd /notes2tone
+pip install -e .
+```
+
+### 4. Install ONNX Runtime (resolves the cuda and cudnn installtion)
+
+```bash
+conda install onnxruntime=1.19.2
+```
+
+**Verify GPU:**
+```python
+import onnxruntime as ort
+print(ort.get_available_providers())
+# Should show: ['CUDAExecutionProvider', 'CPUExecutionProvider']
+```
+
+### 5. Install OEMER
+
+**Option A: Simple**
+```bash
+pip install oemer   # already installed with notes2tone dependencys
+```
+
+**Option B:**
+```bash
+# Clone OEMER
+cd ~/work  # or your preferred location
+git clone https://github.com/BreezeWhite/oemer.git
+cd oemer
+
+# Install
+pip install -e .
+```
+
+If using Option B, specify the path in the notebook:
+```python
+oemer = OemerModel(oemer_module_path="/path/to/oemer")
+```
+
+### 6. Install HOMR
+
+```bash
+# Clone repository
+cd ~/work  # or your preferred location
+git clone https://github.com/liebharc/homr.git
+cd homr
+
+# Install Poetry
+pip install poetry
+poetry config virtualenvs.create false
+
+# Install dependencies
+poetry install --only main,gpu  # For GPU support
+# or: poetry install --only main  # For CPU only
+# or: poetry install  # For development
+
+# Test installation
+poetry run homr <image_path>
+```
+
+### 7. Setup HuggingFace Authentication
+
+Create `.env` file in notes2tone project root:
 ```
 HF_TOKEN=your_token_here
 ```
 
-Get token from https://huggingface.co/settings/tokens  
+Get token: https://huggingface.co/settings/tokens  
 Request access: https://huggingface.co/datasets/PRAIG/SMB
 
-### 3. Run Benchmark
+### 7. Setup Jupyter Kernel
+
+```bash
+pip install ipykernel
+python -m ipykernel install --user --name notes2tone --display-name "notes2tone"
+```
+
+### 8. Specify the path of oemer and homr in notebook
+```bash
+# check in terminal with activated environment
+
+which oemer
+which homr
+```
+
+## Quick Start
+
+### Run Benchmark
 
 ```bash
 # Benchmark all models
@@ -47,38 +123,9 @@ python -m benchmarks.benchmark --models all --limit 10
 
 # Benchmark specific models
 python -m benchmarks.benchmark --models oemer homr --limit 10
-
-# Benchmark with Audiveris
-python -m benchmarks.benchmark --models audiveris --limit 5
 ```
 
-### 4. Model Installation
-
-**OeMeR:**
-```bash
-pip install oemer
-```
-
-**homr:**
-```bash
-# Clone and install with Poetry
-git clone https://github.com/liebharc/homr
-cd homr
-poetry install --only main,gpu  # for GPU
-poetry install --only main      # for CPU only
-```
-
-**Audiveris:**
-- Windows: Download .msi from [releases](https://github.com/Audiveris/audiveris/releases)
-- Linux: use install script to install localy or download .deb or use Flatpak from [Flathub](https://flathub.org/apps/org.audiveris.audiveris)
-   ```bash
-   chmod +x audiveris_setup.sh
-   ./audiveris_setup.sh
-   ```
-- macOS: Download .dmg from releases
-- Build it yourselfe: Requires Java 11+ ([download here](https://adoptium.net/))
-
-### 5. Browse Dataset
+### Browse Dataset
 
 ```bash
 python dataset_viewer.py

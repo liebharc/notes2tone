@@ -12,18 +12,8 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "music21>=8.3.0,<10.0.0",
     "oemer>=0.1.8",
-    "ruff>=0.1.0",
+    "onnxruntime-gpu==1.19.2",
 ]
-
-[project.optional-dependencies]
-# CUDA 11.x
-gpu-cuda11 = ["onnxruntime-gpu==1.15.1"]
-
-# CUDA 12.x
-gpu-cuda12 = ["onnxruntime-gpu>=1.19.0"]
-
-# CPU only
-cpu = ["onnxruntime>=1.15.1"]
 
 [build-system]
 requires = ["setuptools>=61.0"]
