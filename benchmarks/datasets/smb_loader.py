@@ -78,11 +78,11 @@ class SMBDataset:
         self._load_dataset()
         
         count = 0
-        for item in self._dataset:
+        for idx, item in enumerate(self._dataset):
             if self.limit and count >= self.limit:
                 break
-                
-            yield self._format_item(item)
+
+            yield self._format_item(item, idx)
             count += 1
     
     def __len__(self) -> int:
@@ -91,7 +91,7 @@ class SMBDataset:
         total = len(self._dataset)
         return min(total, self.limit) if self.limit else total
     
-    def _format_item(self, item: Dict[str, Any]) -> Dict[str, Any]:
+    def _format_item(self, item: Dict[str, Any], index: Optional[int] = None) -> Dict[str, Any]:
         """Format a dataset item to a standardized structure.
         
         Args:
@@ -100,26 +100,34 @@ class SMBDataset:
         Returns:
             Formatted item with image and ground_truth
         """
-        # SMB dataset stores **kern in 'regions' array or 'page' object
-        regions = item.get("regions", [])
-        
-        # Concatenate all region kern annotations
-        kern_parts = []
-        for region in regions:
-            region_kern = region.get("kern", "")
-            if region_kern:
-                kern_parts.append(region_kern)
-        
-        # Join all regions (each region is a separate system/staff)
-        ground_truth = "\n".join(kern_parts) if kern_parts else ""
-        
-        # Fallback: check page-level kern if regions are empty
+        # Prefer full-page kern (valid complete score) and keep it unchanged.
+        ground_truth = ""
+        page = item.get("page", {})
+        if isinstance(page, dict):
+            page_kern = page.get("kern")
+            if isinstance(page_kern, str) and page_kern.strip():
+                ground_truth = page_kern
+
+        # Some dataset variants expose page-level kern at the top level.
         if not ground_truth:
-            page = item.get("page", {})
-            if isinstance(page, dict):
-                ground_truth = page.get("kern", "")
-        
+            top_level_kern = item.get("kern")
+            if isinstance(top_level_kern, str) and top_level_kern.strip():
+                ground_truth = top_level_kern
+
+        # Last resort: concatenate region fragments.
+        regions = item.get("regions", [])
+        if not ground_truth:
+            kern_parts = []
+            for region in regions:
+                region_kern = region.get("kern", "")
+                if isinstance(region_kern, str) and region_kern.strip():
+                    kern_parts.append(region_kern)
+            ground_truth = "\n".join(kern_parts) if kern_parts else ""
+
+        sample_id = f"sample_{index:06d}" if index is not None else "sample_unknown"
+
         return {
+            "sample_id": sample_id,
             "image": item["image"],
             "ground_truth": ground_truth,
             "metadata": {
@@ -142,8 +150,8 @@ class SMBDataset:
         if index < 0 or index >= len(self._dataset):
             raise IndexError(f"Index {index} out of range [0, {len(self._dataset)})")
         
-        return self._format_item(self._dataset[index])
-    
+        return self._format_item(self._dataset[index], index)
+
     def __getitem__(self, index: int) -> Dict[str, Any]:
         """Support indexing with square brackets.
         
