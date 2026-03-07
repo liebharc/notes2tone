@@ -172,8 +172,10 @@ def get_available_models() -> dict[str, BaseOMRModel]:
         Dictionary mapping model names to model instances
     """
     return {
-        "oemer": OemerModel(oemer_path="oemer"),
-        "oemer-tf": OemerModel(oemer_path="oemer", use_tf=True),  # Use TensorFlow (GPU)
+        "oemer": OemerModel(oemer_module_path="oemer"),
+        "oemer-tf": OemerModel(
+            oemer_module_path="oemer", use_tf=True
+        ),  # Use TensorFlow (GPU)
         "homr": HomrModel(homr_path="homr"),
         # Add more models here:
         # "audiveris": AudiverisModel(),
