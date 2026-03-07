@@ -85,11 +85,12 @@ class OemerModel(BaseOMRModel):
                 f"Or specify oemer_module_path parameter"
             )
 
-    def _predict_impl(self, image: Image.Image) -> str:
+    def _predict_impl(self, image: Image.Image, image_name: str = "image") -> str:
         """Run oemer prediction on the image.
 
         Args:
             image: Input sheet music image
+            image_name: Name/identifier for the image
 
         Returns:
             Predicted notation as **kern format
@@ -129,9 +130,7 @@ class OemerModel(BaseOMRModel):
                 # Debug: Save MusicXML for inspection
                 debug_dir = Path("benchmarks/debug")
                 debug_dir.mkdir(exist_ok=True)
-                debug_path = (
-                    debug_dir / f"musicxml_{hash(musicxml_content) % 10000}.xml"
-                )
+                debug_path = debug_dir / f"oemer_{image_name}.xml"
                 with open(debug_path, "w", encoding="utf-8") as f:
                     f.write(musicxml_content)
                 logger.info(f"Saved MusicXML debug file: {debug_path}")

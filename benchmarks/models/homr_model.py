@@ -57,7 +57,9 @@ class HomrModel(BaseOMRModel):
             if not homr_dir_path.exists():
                 raise RuntimeError(f"HOMR directory not found: {self.homr_dir}")
             if not (homr_dir_path / "pyproject.toml").exists():
-                raise RuntimeError(f"Not a valid HOMR repo (missing pyproject.toml): {self.homr_dir}")
+                raise RuntimeError(
+                    f"Not a valid HOMR repo (missing pyproject.toml): {self.homr_dir}"
+                )
             logger.info(f"Using HOMR from: {self.homr_dir} (poetry run)")
             return
 
@@ -77,11 +79,12 @@ class HomrModel(BaseOMRModel):
 
         logger.info(f"homr executable found at: {homr_executable}")
 
-    def _predict_impl(self, image: Image.Image) -> str:
+    def _predict_impl(self, image: Image.Image, image_name: str = "image") -> str:
         """Run homr prediction on the image.
 
         Args:
             image: Input sheet music image
+            image_name: Name/identifier for the image
 
         Returns:
             Predicted notation as **kern string
@@ -98,7 +101,7 @@ class HomrModel(BaseOMRModel):
             if self.homr_dir:
                 # Use homr executable directly from the homr venv
                 homr_executable = Path(self.homr_dir) / ".venv" / "bin" / "homr"
-                
+
                 if not homr_executable.exists():
                     raise RuntimeError(
                         f"HOMR executable not found at: {homr_executable}\n"
@@ -106,7 +109,7 @@ class HomrModel(BaseOMRModel):
                         f"  cd {self.homr_dir}\n"
                         f"  poetry install --only main,gpu"
                     )
-                
+
                 cmd = [str(homr_executable), str(input_path)]
                 if self.force_cpu:
                     cmd.append("--force-cpu")
@@ -150,9 +153,7 @@ class HomrModel(BaseOMRModel):
                 # Debug: Save MusicXML for inspection
                 debug_dir = Path("benchmarks/debug")
                 debug_dir.mkdir(exist_ok=True)
-                debug_path = (
-                    debug_dir / f"homr_musicxml_{hash(musicxml_content) % 10000}.xml"
-                )
+                debug_path = debug_dir / f"homr_{image_name}.xml"
                 with open(debug_path, "w", encoding="utf-8") as f:
                     f.write(musicxml_content)
                 logger.info(f"Saved MusicXML debug file: {debug_path}")
