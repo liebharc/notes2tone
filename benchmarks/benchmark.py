@@ -76,7 +76,7 @@ class BenchmarkRunner:
                 ground_truth = item["ground_truth"]
 
                 # Get image name/identifier
-                image_name = item.get("id", item.get("filename", f"image{idx}"))
+                image_name = item.get("sample_id", item.get("filename", f"image{idx}"))
                 logger.info(f"Processing image: {image_name}")
 
                 # Get prediction
