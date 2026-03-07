@@ -150,13 +150,13 @@ class HomrModel(BaseOMRModel):
                 with open(output_path, "r", encoding="utf-8") as f:
                     musicxml_content = f.read()
 
-                # Debug: Save MusicXML for inspection
-                debug_dir = Path("benchmarks/debug")
-                debug_dir.mkdir(exist_ok=True)
-                debug_path = debug_dir / f"homr_{image_name}.xml"
-                with open(debug_path, "w", encoding="utf-8") as f:
+                # Save MusicXML output
+                output_dir = Path("benchmarks/output/homr")
+                output_dir.mkdir(parents=True, exist_ok=True)
+                xml_path = output_dir / f"{image_name}.xml"
+                with open(xml_path, "w", encoding="utf-8") as f:
                     f.write(musicxml_content)
-                logger.info(f"Saved MusicXML debug file: {debug_path}")
+                logger.info(f"Saved MusicXML output: {xml_path}")
 
                 # Convert MusicXML to **kern format
                 try:
@@ -164,6 +164,13 @@ class HomrModel(BaseOMRModel):
                     logger.info(
                         f"Successfully converted MusicXML to **kern ({len(kern_output)} chars)"
                     )
+
+                    # Save **kern prediction
+                    kern_path = output_dir / f"{image_name}.kern"
+                    with open(kern_path, "w", encoding="utf-8") as f:
+                        f.write(kern_output)
+                    logger.info(f"Saved **kern prediction: {kern_path}")
+
                     return kern_output
                 except Exception as e:
                     logger.error(f"Failed to convert MusicXML to **kern: {e}")
