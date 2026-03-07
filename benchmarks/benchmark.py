@@ -44,11 +44,15 @@ class BenchmarkRunner:
         dataset: SMBDataset,
         output_dir: Path = Path("benchmarks/results"),
         save_predictions: bool = False,
+        start_from: int = 0,
+        limit: int | None = None,
     ):
         self.dataset = dataset
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.save_predictions = save_predictions
+        self.start_from = start_from
+        self.limit = limit
 
     def evaluate_model(self, model: BaseOMRModel) -> dict[str, any]:
         """Evaluate a single model on the dataset.
@@ -69,8 +73,17 @@ class BenchmarkRunner:
         model.initialize()
 
         # Evaluate on each sample
-        dataset_size = len(self.dataset)
+        processed_count = 0
+
         for idx, item in enumerate(tqdm(self.dataset, desc=f"Evaluating {model.name}")):
+            # Skip samples before start_from index
+            if idx < self.start_from:
+                continue
+
+            # Stop if we've processed enough samples (limit)
+            if self.limit is not None and processed_count >= self.limit:
+                break
+
             try:
                 image = item["image"]
                 ground_truth = item["ground_truth"]
@@ -84,6 +97,7 @@ class BenchmarkRunner:
 
                 predictions.append(prediction)
                 ground_truths.append(ground_truth)
+                processed_count += 1
 
             except Exception as e:
                 logger.error(f"Error on sample {idx}: {e}")
@@ -91,13 +105,16 @@ class BenchmarkRunner:
                 # Add empty prediction to maintain alignment
                 predictions.append("")
                 ground_truths.append(item.get("ground_truth", ""))
+                processed_count += 1
 
         # Calculate metrics
         metrics = calculate_metrics(predictions, ground_truths)
 
         # Add error information
         metrics["num_errors"] = len(errors)
-        metrics["error_rate"] = len(errors) / dataset_size if dataset_size > 0 else 0.0
+        metrics["error_rate"] = (
+            len(errors) / processed_count if processed_count > 0 else 0.0
+        )
 
         results = {
             "model_name": model.name,
@@ -214,6 +231,13 @@ def main():
     )
 
     parser.add_argument(
+        "--start-from",
+        type=int,
+        default=0,
+        help="Start evaluation from specific sample index (default: 0)",
+    )
+
+    parser.add_argument(
         "--output-dir",
         type=Path,
         default=Path("benchmarks/results"),
@@ -244,8 +268,13 @@ def main():
     # Load dataset with token from args or environment
     hf_token = args.hf_token or os.getenv("HF_TOKEN")
 
+    # Calculate dataset size needed: if start_from is set, we need more samples
+    dataset_limit = None
+    if args.limit is not None:
+        dataset_limit = args.start_from + args.limit
+
     if args.dataset == "smb":
-        dataset = SMBDataset(limit=args.limit, token=hf_token)
+        dataset = SMBDataset(limit=dataset_limit, token=hf_token)
     else:
         logger.error(f"Unknown dataset: {args.dataset}")
         sys.exit(1)
@@ -271,6 +300,8 @@ def main():
         dataset=dataset,
         output_dir=args.output_dir,
         save_predictions=args.save_predictions,
+        start_from=args.start_from,
+        limit=args.limit,
     )
 
     # Evaluate each model
