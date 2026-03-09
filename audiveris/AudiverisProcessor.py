@@ -2,7 +2,7 @@ import shutil
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 import logging
 
 logger = logging.getLogger(__name__)
@@ -15,28 +15,61 @@ MAX_COMMAND_LENGTH = 7000
 class AudiverisProcessor:
     """Process images with Audiveris in batches, respecting command length limits."""
 
-    def __init__(self, audiveris_path: str, output_dir: str):
+    def __init__(
+        self,
+        audiveris_path: str,
+        output_dir: str,
+        upscale_factor: float = 2.0,
+        upscale_max_side_threshold: int = 3500,
+    ):
         """
         Args:
             audiveris_path: Path to Audiveris executable
             output_dir: Directory where Audiveris will output files
+            upscale_factor: Scale factor applied before Audiveris (1.0 disables upscaling)
+            upscale_max_side_threshold: Only upscale images whose max side is below this threshold
         """
         self.audiveris_path = audiveris_path
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
+        if upscale_factor < 1.0:
+            raise ValueError("upscale_factor must be >= 1.0")
+        self.upscale_factor = upscale_factor
+        self.upscale_max_side_threshold = upscale_max_side_threshold
+
     def _save_image_to_temp(self, image, sample_id: str) -> str:
-        """Save a PIL image to a temporary file and return its path."""
+        """Save a PIL image to a temporary file (optionally upscaled) and return its path."""
         from PIL import Image
 
         temp_dir = Path(tempfile.gettempdir()) / "audiveris_batch"
         temp_dir.mkdir(parents=True, exist_ok=True)
 
         temp_path = temp_dir / f"{sample_id}.png"
+
         if isinstance(image, Image.Image):
-            image.save(str(temp_path))
+            source_img = image
+            close_after = False
         else:
-            shutil.copy(str(image), str(temp_path))
+            source_img = Image.open(str(image))
+            close_after = True
+
+        out_img = source_img
+        try:
+            width, height = out_img.size
+            should_upscale = self.upscale_factor > 1.0 and max(width, height) < self.upscale_max_side_threshold
+
+            if should_upscale:
+                new_size = (max(1, int(width * self.upscale_factor)), max(1, int(height * self.upscale_factor)))
+                out_img = out_img.resize(new_size, resample=Image.Resampling.LANCZOS)
+                logger.info(f"Upscaled {sample_id}: {width}x{height} -> {new_size[0]}x{new_size[1]}")
+
+            out_img.save(str(temp_path))
+        finally:
+            if close_after:
+                source_img.close()
+            if out_img is not source_img:
+                out_img.close()
 
         return str(temp_path)
 

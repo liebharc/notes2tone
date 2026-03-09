@@ -103,6 +103,8 @@ def run_pipeline(
     limit: Optional[int] = None,
     hf_token: Optional[str] = None,
     skip_prediction: bool = False,
+    audiveris_upscale_factor: float = 2.0,
+    audiveris_upscale_max_side: int = 3500,
 ) -> None:
     pred_dir = benchmark_output / "pred"
     gt_dir = benchmark_output / "gt"
@@ -116,7 +118,12 @@ def run_pipeline(
             raise ValueError("--audiveris-path is required when not using --skip-prediction")
 
         dataset = SMBDataset(split=split, limit=limit, token=hf_token)
-        processor = AudiverisProcessor(audiveris_path=audiveris_path, output_dir=str(audiveris_output))
+        processor = AudiverisProcessor(
+            audiveris_path=audiveris_path,
+            output_dir=str(audiveris_output),
+            upscale_factor=audiveris_upscale_factor,
+            upscale_max_side_threshold=audiveris_upscale_max_side,
+        )
 
         samples = processor.process_dataset(dataset, limit=limit)
 
@@ -140,6 +147,18 @@ if __name__ == "__main__":
     parser.add_argument("--hf-token", type=str, default=None)
     parser.add_argument("--clean", action="store_true", help="Delete old output folders before running")
     parser.add_argument("--skip-prediction", action="store_true", help="Skip Audiveris prediction and only reconvert existing MXL files to kern")
+    parser.add_argument(
+        "--audiveris-upscale-factor",
+        type=float,
+        default=2.0,
+        help="Upscale factor for Audiveris input images (1.0 disables upscaling)",
+    )
+    parser.add_argument(
+        "--audiveris-upscale-max-side",
+        type=int,
+        default=3500,
+        help="Only upscale images when max(width,height) is below this pixel threshold",
+    )
 
     args = parser.parse_args()
 
@@ -157,4 +176,6 @@ if __name__ == "__main__":
         limit=args.limit,
         hf_token=args.hf_token,
         skip_prediction=args.skip_prediction,
+        audiveris_upscale_factor=args.audiveris_upscale_factor,
+        audiveris_upscale_max_side=args.audiveris_upscale_max_side,
     )

@@ -131,6 +131,17 @@ python -m benchmarks.benchmark --models oemer homr --limit 10
 python dataset_viewer.py
 ```
 
+### Run Audiveris Pipeline
+
+```bash
+python -m benchmarks.audiveris_pipeline \
+  --audiveris-path /path/to/Audiveris \
+  --audiveris-upscale-factor 2.0 \
+  --audiveris-upscale-max-side 3500
+```
+
+If Audiveris skips many pages because staff lines are too close, increase `--audiveris-upscale-factor` (e.g. `2.5`).
+
 ## Project Structure
 
 ```
