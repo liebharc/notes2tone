@@ -158,9 +158,9 @@ class HomrModel(BaseOMRModel):
                     musicxml_content = f.read()
 
                 # Save MusicXML output
-                output_dir = Path("benchmarks/output/homr")
-                output_dir.mkdir(parents=True, exist_ok=True)
-                xml_path = output_dir / f"{image_name}.xml"
+                xml_output_dir = Path("benchmarks/output/homr/xml")
+                xml_output_dir.mkdir(parents=True, exist_ok=True)
+                xml_path = xml_output_dir / f"{image_name}.xml"
                 with open(xml_path, "w", encoding="utf-8") as f:
                     f.write(musicxml_content)
                 logger.info(f"Saved MusicXML output: {xml_path}")
@@ -173,7 +173,9 @@ class HomrModel(BaseOMRModel):
                     )
 
                     # Save **kern prediction
-                    kern_path = output_dir / f"{image_name}.kern"
+                    kern_output_dir = Path("benchmarks/output/homr/kern")
+                    kern_output_dir.mkdir(parents=True, exist_ok=True)
+                    kern_path = kern_output_dir / f"{image_name}.kern"
                     with open(kern_path, "w", encoding="utf-8") as f:
                         f.write(kern_output)
                     logger.info(f"Saved **kern prediction: {kern_path}")
