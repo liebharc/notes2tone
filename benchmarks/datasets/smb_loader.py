@@ -14,38 +14,39 @@ logger = logging.getLogger(__name__)
 
 class SMBDataset:
     """Wrapper for the PRAIG/SMB benchmark dataset.
-    
+
     Args:
         split: Dataset split to load (default: "test")
         cache_dir: Optional directory to cache the dataset
         limit: Optional limit on number of samples to load
         token: HuggingFace API token for gated datasets (or set HF_TOKEN env var)
     """
-    
+
     def __init__(
         self,
         split: str = "test",
         cache_dir: Optional[str] = None,
         limit: Optional[int] = None,
-        token: Optional[str] = None
+        token: Optional[str] = None,
     ):
         self.split = split
         self.cache_dir = cache_dir
         self.limit = limit
         self.token = token
         self._dataset = None
-        
+
     def _load_dataset(self):
         """Lazy load the dataset from HuggingFace."""
         if self._dataset is None:
             try:
                 from datasets import load_dataset
+
                 logger.info(f"Loading PRAIG/SMB dataset (split: {self.split})...")
                 self._dataset = load_dataset(
                     "PRAIG/SMB",
                     split=self.split,
                     cache_dir=self.cache_dir,
-                    token=self.token  # Pass token for gated datasets
+                    token=self.token,  # Pass token for gated datasets
                 )
                 logger.info(f"Loaded {len(self._dataset)} samples")
             except ImportError:
@@ -55,7 +56,10 @@ class SMBDataset:
                 )
             except Exception as e:
                 error_msg = str(e)
-                if "gated dataset" in error_msg.lower() or "authenticated" in error_msg.lower():
+                if (
+                    "gated dataset" in error_msg.lower()
+                    or "authenticated" in error_msg.lower()
+                ):
                     raise RuntimeError(
                         f"Failed to load SMB dataset: {e}\n\n"
                         "The PRAIG/SMB dataset is gated. To access it:\n"
@@ -65,10 +69,10 @@ class SMBDataset:
                         "   Or pass token parameter to SMBDataset(token='your_token')"
                     )
                 raise RuntimeError(f"Failed to load SMB dataset: {e}")
-    
+
     def __iter__(self) -> Iterator[Dict[str, Any]]:
         """Iterate over dataset samples.
-        
+
         Yields:
             Dict with keys:
                 - image: PIL.Image
@@ -76,80 +80,90 @@ class SMBDataset:
                 - metadata: dict (additional info like regions, symbols)
         """
         self._load_dataset()
-        
+
         count = 0
-        for item in self._dataset:
+        for idx, item in enumerate(self._dataset):
             if self.limit and count >= self.limit:
                 break
-                
-            yield self._format_item(item)
+
+            yield self._format_item(item, idx)
             count += 1
-    
+
     def __len__(self) -> int:
         """Return the number of samples (respecting limit)."""
         self._load_dataset()
         total = len(self._dataset)
         return min(total, self.limit) if self.limit else total
-    
-    def _format_item(self, item: Dict[str, Any]) -> Dict[str, Any]:
+
+    def _format_item(
+        self, item: Dict[str, Any], index: Optional[int] = None
+    ) -> Dict[str, Any]:
         """Format a dataset item to a standardized structure.
-        
+
         Args:
             item: Raw item from HuggingFace dataset
-            
+
         Returns:
             Formatted item with image and ground_truth
         """
-        # SMB dataset stores **kern in 'regions' array or 'page' object
-        regions = item.get("regions", [])
-        
-        # Concatenate all region kern annotations
-        kern_parts = []
-        for region in regions:
-            region_kern = region.get("kern", "")
-            if region_kern:
-                kern_parts.append(region_kern)
-        
-        # Join all regions (each region is a separate system/staff)
-        ground_truth = "\n".join(kern_parts) if kern_parts else ""
-        
-        # Fallback: check page-level kern if regions are empty
+        # Prefer full-page kern (valid complete score) and keep it unchanged.
+        ground_truth = ""
+        page = item.get("page", {})
+        if isinstance(page, dict):
+            page_kern = page.get("kern")
+            if isinstance(page_kern, str) and page_kern.strip():
+                ground_truth = page_kern
+
+        # Some dataset variants expose page-level kern at the top level.
         if not ground_truth:
-            page = item.get("page", {})
-            if isinstance(page, dict):
-                ground_truth = page.get("kern", "")
-        
+            top_level_kern = item.get("kern")
+            if isinstance(top_level_kern, str) and top_level_kern.strip():
+                ground_truth = top_level_kern
+
+        # Last resort: concatenate region fragments.
+        regions = item.get("regions", [])
+        if not ground_truth:
+            kern_parts = []
+            for region in regions:
+                region_kern = region.get("kern", "")
+                if isinstance(region_kern, str) and region_kern.strip():
+                    kern_parts.append(region_kern)
+            ground_truth = "\n".join(kern_parts) if kern_parts else ""
+
+        sample_id = f"sample_{index:06d}" if index is not None else "sample_unknown"
+
         return {
+            "sample_id": sample_id,
             "image": item["image"],
             "ground_truth": ground_truth,
             "metadata": {
                 "regions": regions,
                 "width": item.get("original_width"),
                 "height": item.get("original_height"),
-            }
+            },
         }
-    
+
     def get_sample(self, index: int) -> Dict[str, Any]:
         """Get a specific sample by index.
-        
+
         Args:
             index: Sample index
-            
+
         Returns:
             Formatted sample dict
         """
         self._load_dataset()
         if index < 0 or index >= len(self._dataset):
             raise IndexError(f"Index {index} out of range [0, {len(self._dataset)})")
-        
-        return self._format_item(self._dataset[index])
-    
+
+        return self._format_item(self._dataset[index], index)
+
     def __getitem__(self, index: int) -> Dict[str, Any]:
         """Support indexing with square brackets.
-        
+
         Args:
             index: Sample index
-            
+
         Returns:
             Formatted sample dict
         """
