@@ -1,6 +1,8 @@
 import argparse
 import logging
 import shutil
+import subprocess
+import tempfile
 import zipfile
 from pathlib import Path
 from typing import Optional
@@ -9,7 +11,6 @@ from xml.etree import ElementTree as ET
 from dotenv import load_dotenv
 
 from audiveris.AudiverisProcessor import AudiverisProcessor
-from benchmarks.converters.musicxml_to_kern import convert_musicxml_to_kern
 from benchmarks.datasets import SMBDataset
 
 logger = logging.getLogger(__name__)
@@ -53,39 +54,77 @@ def _copy_ground_truth(samples: list[dict], gt_dir: Path) -> None:
 
 def _convert_audiveris_output_to_pred(output_dir: Path, pred_dir: Path) -> int:
     pred_dir.mkdir(parents=True, exist_ok=True)
+
+    # Try hardcoded path first, then fall back to PATH
+    xml2hum_bin = Path("~/shared/notes2tone/benchmarks/converters/xml2hum").expanduser()
+    if not xml2hum_bin.exists():
+        xml2hum_found = shutil.which("xml2hum")
+        if xml2hum_found:
+            xml2hum_bin = Path(xml2hum_found)
+        else:
+            raise RuntimeError("xml2hum was not found. Please install humlib/humdrum tools or check the path.")
+
     converted = 0
     for mxl_path in sorted(output_dir.glob("*.mxl")):
+        temp_xml_path: Optional[Path] = None
         try:
             xml_content = _read_musicxml_from_mxl(mxl_path)
-            kern_content = convert_musicxml_to_kern(xml_content)
-            (pred_dir / f"{mxl_path.stem}.krn").write_text(kern_content, encoding="utf-8")
+            with tempfile.NamedTemporaryFile("w", suffix=".xml", encoding="utf-8", delete=False) as tmp_xml:
+                tmp_xml.write(xml_content)
+                temp_xml_path = Path(tmp_xml.name)
+
+            pred_path = pred_dir / f"{mxl_path.stem}.krn"
+            with pred_path.open("w", encoding="utf-8", newline="") as out_file:
+                result = subprocess.run(
+                    [str(xml2hum_bin), str(temp_xml_path)],
+                    stdout=out_file,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    check=False,
+                )
+
+            if result.returncode != 0:
+                raise RuntimeError(result.stderr.strip() or f"xml2hum failed with exit code {result.returncode}")
+
             converted += 1
         except Exception as exc:
             logger.warning(f"Skipping {mxl_path.name}: {exc}")
+        finally:
+            if temp_xml_path and temp_xml_path.exists():
+                temp_xml_path.unlink()
     return converted
 
 
 def run_pipeline(
-    audiveris_path: str,
+    audiveris_path: Optional[str],
     audiveris_output: Path,
     benchmark_output: Path,
     split: str = "test",
     limit: Optional[int] = None,
     hf_token: Optional[str] = None,
+    skip_prediction: bool = False,
 ) -> None:
-    dataset = SMBDataset(split=split, limit=limit, token=hf_token)
-    processor = AudiverisProcessor(audiveris_path=audiveris_path, output_dir=str(audiveris_output))
-
-    samples = processor.process_dataset(dataset, limit=limit)
-
     pred_dir = benchmark_output / "pred"
     gt_dir = benchmark_output / "gt"
 
-    converted = _convert_audiveris_output_to_pred(audiveris_output, pred_dir)
-    _copy_ground_truth(samples, gt_dir)
+    if skip_prediction:
+        logger.info("Skipping Audiveris prediction phase (--skip-prediction enabled)")
+        converted = _convert_audiveris_output_to_pred(audiveris_output, pred_dir)
+        logger.info(f"Converted {converted} .mxl files into {pred_dir}")
+    else:
+        if not audiveris_path:
+            raise ValueError("--audiveris-path is required when not using --skip-prediction")
 
-    logger.info(f"Converted {converted} .mxl files into {pred_dir}")
-    logger.info(f"Copied {len(samples)} ground-truth files into {gt_dir}")
+        dataset = SMBDataset(split=split, limit=limit, token=hf_token)
+        processor = AudiverisProcessor(audiveris_path=audiveris_path, output_dir=str(audiveris_output))
+
+        samples = processor.process_dataset(dataset, limit=limit)
+
+        converted = _convert_audiveris_output_to_pred(audiveris_output, pred_dir)
+        _copy_ground_truth(samples, gt_dir)
+
+        logger.info(f"Converted {converted} .mxl files into {pred_dir}")
+        logger.info(f"Copied {len(samples)} ground-truth files into {gt_dir}")
 
 
 if __name__ == "__main__":
@@ -93,13 +132,14 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
     parser = argparse.ArgumentParser(description="Run Audiveris on SMB and build pred/gt **kern folders")
-    parser.add_argument("--audiveris-path", required=True, help="Path to Audiveris executable")
+    parser.add_argument("--audiveris-path", help="Path to Audiveris executable (required unless --skip-prediction is set)")
     parser.add_argument("--audiveris-output", type=Path, default=Path("audiveris_output"))
     parser.add_argument("--benchmark-output", type=Path, default=Path("benchmarks/generated"))
     parser.add_argument("--split", default="test")
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--hf-token", type=str, default=None)
     parser.add_argument("--clean", action="store_true", help="Delete old output folders before running")
+    parser.add_argument("--skip-prediction", action="store_true", help="Skip Audiveris prediction and only reconvert existing MXL files to kern")
 
     args = parser.parse_args()
 
@@ -116,5 +156,5 @@ if __name__ == "__main__":
         split=args.split,
         limit=args.limit,
         hf_token=args.hf_token,
+        skip_prediction=args.skip_prediction,
     )
-
