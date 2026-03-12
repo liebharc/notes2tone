@@ -22,3 +22,4 @@ benchmarks/results/
 *.mid
 *.wav
 *.mp3
+*krn
