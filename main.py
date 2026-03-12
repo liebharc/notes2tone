@@ -12,12 +12,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--gt",
-        default="generated/gt",
+        default="generated/gt_test",
         help="Path to the ground-truth folder (default: generated/gt).",
     )
     parser.add_argument(
         "--pred",
-        default="generated/xml_scaled",
+        default="generated/xml_test",
         help="Path to the predicted folder (default: generated/pred).",
     )
     parser.add_argument(
