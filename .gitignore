@@ -13,6 +13,8 @@ __pycache__/
 benchmarks/debug/
 benchmarks/results/
 
+figures/
+
 # Model outputs
 *.musicxml
 *.xml
