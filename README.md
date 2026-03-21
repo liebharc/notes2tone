@@ -31,43 +31,7 @@ cd /notes2tone
 pip install -e .
 ```
 
-### 4. Install ONNX Runtime (resolves the cuda and cudnn installtion)
-
-```bash
-conda install onnxruntime=1.19.2
-```
-
-**Verify GPU:**
-```python
-import onnxruntime as ort
-print(ort.get_available_providers())
-# Should show: ['CUDAExecutionProvider', 'CPUExecutionProvider']
-```
-
-### 5. Install OEMER
-
-**Option A: Simple**
-```bash
-pip install oemer   # already installed with notes2tone dependencys
-```
-
-**Option B:**
-```bash
-# Clone OEMER
-cd ~/work  # or your preferred location
-git clone https://github.com/BreezeWhite/oemer.git
-cd oemer
-
-# Install
-pip install -e .
-```
-
-If using Option B, specify the path in the notebook:
-```python
-oemer = OemerModel(oemer_module_path="/path/to/oemer")
-```
-
-### 6. Install HOMR
+### 4. Install HOMR
 
 ```bash
 # Clone repository
@@ -88,7 +52,7 @@ poetry install --only main,gpu  # For GPU support
 poetry run homr <image_path>
 ```
 
-### 7. Setup HuggingFace Authentication
+### 5. Setup HuggingFace Authentication
 
 Create `.env` file in notes2tone project root:
 ```
@@ -98,20 +62,6 @@ HF_TOKEN=your_token_here
 Get token: https://huggingface.co/settings/tokens  
 Request access: https://huggingface.co/datasets/PRAIG/SMB
 
-### 7. Setup Jupyter Kernel
-
-```bash
-pip install ipykernel
-python -m ipykernel install --user --name notes2tone --display-name "notes2tone"
-```
-
-### 8. Specify the path of oemer and homr in notebook
-```bash
-# check in terminal with activated environment
-
-which oemer
-which homr
-```
 
 ## Quick Start
 
@@ -122,7 +72,7 @@ which homr
 python -m benchmarks.benchmark --models all --limit 10
 
 # Benchmark specific models
-python -m benchmarks.benchmark --models oemer homr --limit 10
+python -m benchmarks.benchmark --models oemer homr --limit 1
 ```
 
 ### Browse Dataset
