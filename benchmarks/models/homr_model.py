@@ -14,7 +14,6 @@ from PIL import Image
 import logging
 
 from .base_model import BaseOMRModel
-from ..converters import convert_musicxml_to_kern
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +22,7 @@ class HomrModel(BaseOMRModel):
     """Wrapper for the homr OMR model.
 
     This model uses the homr CLI to perform predictions.
-    homr outputs MusicXML files, which are then converted to **kern format.
+    homr outputs MusicXML files.
 
     Args:
         homr_path: Path to the homr executable (default: "homr")
@@ -88,7 +87,7 @@ class HomrModel(BaseOMRModel):
             image_name: Name/identifier for the image
 
         Returns:
-            Predicted notation as **kern string
+            Predicted notation as MusicXML string
         """
         # Create temporary directory for input and output
         with tempfile.TemporaryDirectory() as tmp_dir:
@@ -165,27 +164,7 @@ class HomrModel(BaseOMRModel):
                     f.write(musicxml_content)
                 logger.info(f"Saved MusicXML output: {xml_path}")
 
-                # Convert MusicXML to **kern format
-                try:
-                    kern_output = convert_musicxml_to_kern(musicxml_content)
-                    logger.info(
-                        f"Successfully converted MusicXML to **kern ({len(kern_output)} chars)"
-                    )
-
-                    # Save **kern prediction
-                    kern_output_dir = Path("benchmarks/output/homr/kern")
-                    kern_output_dir.mkdir(parents=True, exist_ok=True)
-                    kern_path = kern_output_dir / f"{image_name}.kern"
-                    with open(kern_path, "w", encoding="utf-8") as f:
-                        f.write(kern_output)
-                    logger.info(f"Saved **kern prediction: {kern_path}")
-
-                    return kern_output
-                except Exception as e:
-                    logger.error(f"Failed to convert MusicXML to **kern: {e}")
-                    # Fall back to returning raw MusicXML if conversion fails
-                    logger.warning("Returning raw MusicXML instead of **kern")
-                    return musicxml_content
+                return musicxml_content
 
             except subprocess.TimeoutExpired:
                 raise RuntimeError("homr prediction timed out (>8 minutes)")

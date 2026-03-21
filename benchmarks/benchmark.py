@@ -17,7 +17,6 @@ from benchmarks.datasets import SMBDataset
 from benchmarks.models.base_model import BaseOMRModel
 from benchmarks.models.oemer_model import OemerModel
 from benchmarks.models.homr_model import HomrModel
-from benchmarks.eval import calculate_metrics, format_metrics
 
 # Load environment variables from .env file
 load_dotenv()
@@ -107,19 +106,9 @@ class BenchmarkRunner:
                 ground_truths.append(item.get("ground_truth", ""))
                 processed_count += 1
 
-        # Calculate metrics
-        metrics = calculate_metrics(predictions, ground_truths)
-
-        # Add error information
-        metrics["num_errors"] = len(errors)
-        metrics["error_rate"] = (
-            len(errors) / processed_count if processed_count > 0 else 0.0
-        )
-
         results = {
             "model_name": model.name,
             "model_config": model.config,
-            "metrics": metrics,
             "errors": errors,
             "timestamp": datetime.now().isoformat(),
         }
@@ -320,9 +309,6 @@ def main():
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"{model_name}_{args.dataset}_{timestamp}.json"
             runner.save_results(results, filename)
-
-            # Print metrics
-            print(format_metrics(results["metrics"], model_name))
 
         except Exception as e:
             logger.error(f"Failed to evaluate {model_name}: {e}", exc_info=True)

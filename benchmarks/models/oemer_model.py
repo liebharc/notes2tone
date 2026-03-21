@@ -14,7 +14,6 @@ import logging
 from argparse import Namespace
 
 from .base_model import BaseOMRModel
-from ..converters import convert_musicxml_to_kern
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +22,7 @@ class OemerModel(BaseOMRModel):
     """Wrapper for the OeMeR OMR model.
 
     This model calls OEMER directly as a Python module.
-    OeMeR outputs MusicXML files, which are then converted to **kern format.
+    OeMeR outputs MusicXML files.
 
     Args:
         oemer_module_path: Optional path to OEMER module directory (e.g., "/home/jovyan/work/oemer").
@@ -93,7 +92,7 @@ class OemerModel(BaseOMRModel):
             image_name: Name/identifier for the image
 
         Returns:
-            Predicted notation as **kern format
+            Predicted notation as MusicXML string
         """
         from oemer.ete import extract, clear_data
 
@@ -135,24 +134,7 @@ class OemerModel(BaseOMRModel):
                     f.write(musicxml_content)
                 logger.info(f"Saved MusicXML output: {xml_path}")
 
-                # Convert MusicXML to **kern format
-                try:
-                    kern_output = convert_musicxml_to_kern(musicxml_content)
-                    logger.info(
-                        f"Successfully converted MusicXML to **kern ({len(kern_output)} chars)"
-                    )
-
-                    # Save **kern prediction
-                    kern_path = output_dir / f"{image_name}.kern"
-                    with open(kern_path, "w", encoding="utf-8") as f:
-                        f.write(kern_output)
-                    logger.info(f"Saved **kern prediction: {kern_path}")
-
-                    return kern_output
-                except Exception as e:
-                    logger.error(f"Failed to convert MusicXML to **kern: {e}")
-                    logger.warning("Returning raw MusicXML instead of **kern")
-                    return musicxml_content
+                return musicxml_content
 
             except Exception as e:
                 raise RuntimeError(f"OEMER prediction failed: {e}")
