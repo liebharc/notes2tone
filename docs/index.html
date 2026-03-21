@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notes2Tone - OMR Ergebnisse</title>
+    <meta
+      name="description"
+      content="Kurzuebersicht der Notes2Tone-Ergebnisse: Vergleich von Audiveris, Audiveris-Scaled, HOMR und OeMeR auf dem SMB-Datensatz."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Literata:opsz,wght@7..72,400;7..72,600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero__glow hero__glow--left" aria-hidden="true"></div>
+      <div class="hero__glow hero__glow--right" aria-hidden="true"></div>
+      <p class="tag">Notes2Tone</p>
+      <h1>Open-Source OMR im direkten Benchmark</h1>
+      <p class="lead">
+        Wir vergleichen Audiveris, Audiveris-Scaled, HOMR und OeMeR auf dem
+        Sheet Music Benchmark (SMB) und zeigen kurz die wichtigsten Resultate.
+      </p>
+      <div class="hero__stats">
+        <article>
+          <p class="kpi">685</p>
+          <p class="label">SMB Samples</p>
+        </article>
+        <article>
+          <p class="kpi">4</p>
+          <p class="label">Systemvarianten</p>
+        </article>
+        <article>
+          <p class="kpi">OMR-NED</p>
+          <p class="label">Hauptmetrik (niedriger besser)</p>
+        </article>
+      </div>
+    </header>
+
+    <main>
+      <section class="section reveal">
+        <h2>Setup in 20 Sekunden</h2>
+        <div class="cards cards--three">
+          <article class="card">
+            <h3>Datensatz</h3>
+            <p>
+              SMB mit 685 Notenbildern in mehreren Textur-Kategorien und Ground
+              Truth im kern-Format.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Modelle</h3>
+            <p>
+              Audiveris, Audiveris-Scaled, HOMR und OeMeR. Audiveris-Scaled ist
+              Audiveris mit vorgeschaltetem Upscaling.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Bewertung</h3>
+            <p>
+              OMR-NED als Distanzmass zwischen Vorhersage und Ground Truth,
+              ergaenzt durch Fehlertyp-Analysen.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section reveal">
+        <h2>Kernaussagen</h2>
+        <div class="results-grid">
+          <article class="result">
+            <h3>Vier-Modell Vergleich (n=104)</h3>
+            <p>
+              Median OMR-NED: HOMR 0.243, Audiveris-Scaled 0.250, Audiveris
+              0.321, OeMeR 0.715.
+            </p>
+            <p class="accent">HOMR liegt vorn, OeMeR faellt klar zurueck.</p>
+          </article>
+          <article class="result">
+            <h3>Drei-Modell Vergleich (n=453)</h3>
+            <p>
+              Mit mehr schwierigen Pianoform-Samples steigen alle Werte:
+              HOMR 0.603, Audiveris-Scaled 0.660, OeMeR 0.753.
+            </p>
+            <p class="accent">Rangfolge bleibt stabil: HOMR vor Audiveris-Scaled vor OeMeR.</p>
+          </article>
+          <article class="result">
+            <h3>Coverage</h3>
+            <p>
+              Erfolgreich verarbeitete SMB-Samples: Audiveris 29.3 Prozent,
+              Audiveris-Scaled 78.5 Prozent, HOMR 99.3 Prozent, OeMeR 84.8
+              Prozent.
+            </p>
+            <p class="accent">Upscaling macht Audiveris fuer deutlich mehr Seiten nutzbar.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section reveal">
+        <h2>Ergebnisplots</h2>
+        <div class="figure-grid">
+          <figure class="panel">
+            <img src="assets/ned_histograms.png" alt="Histogramme der OMR-NED Verteilungen" loading="lazy" />
+            <figcaption>
+              OMR-NED Verteilungen der vier Modelle auf den gemeinsamen Samples.
+            </figcaption>
+          </figure>
+          <figure class="panel">
+            <img src="assets/error_types_heatmap.png" alt="Heatmap der Fehlertyp-Beitraege" loading="lazy" />
+            <figcaption>
+              Notenfehler dominieren bei allen Modellen, Profile unterscheiden
+              sich jedoch deutlich.
+            </figcaption>
+          </figure>
+          <figure class="panel">
+            <img src="assets/summary_table.png" alt="Zusammenfassung der Metriken als Tabelle" loading="lazy" />
+            <figcaption>
+              Kompakte Kennzahlen zu Median, Mittelwert, Streuung und Extremen.
+            </figcaption>
+          </figure>
+          <figure class="panel">
+            <img src="assets/top_flop_tables.png" alt="Top und Flop Beispiele" loading="lazy" />
+            <figcaption>
+              Beispiele zeigen, wo Systeme sehr gut funktionieren und wo sie
+              scheitern.
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="section section--final reveal">
+        <h2>Fazit</h2>
+        <p>
+          HOMR liefert im Benchmark die beste Gesamtleistung. Audiveris-Scaled
+          ist durch Upscaling ein praktischer Kompromiss mit deutlich hoeherer
+          Abdeckung als Audiveris. OeMeR zeigt in diesem Setup konsistent
+          schwaechere Ergebnisse.
+        </p>
+        <p>
+          Wichtigster Befund fuer Folgearbeit: Die dominanten Fehlertypen sind
+          modellspezifisch. Verbesserungen sollten deshalb gezielt pro Modell
+          ansetzen statt mit einem globalen Fix.
+        </p>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>Notes2Tone Projektseite | Stand: Maerz 2026</p>
+    </footer>
+  </body>
+</html>
