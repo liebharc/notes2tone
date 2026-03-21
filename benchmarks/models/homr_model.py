@@ -10,6 +10,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 from typing import Optional
+import shutil
 from PIL import Image
 import logging
 
@@ -46,12 +47,29 @@ class HomrModel(BaseOMRModel):
         self.homr_dir = homr_dir
         self.force_cpu = force_cpu
         self.homr_executable = None  # Will be set in _setup()
+        self.use_poetry = False
+
+    def _detect_local_homr_repo(self) -> Optional[Path]:
+        """Try to find a sibling HOMR repo next to the notes2tone root."""
+        # .../notes2tone/benchmarks/models/homr_model.py -> .../GIT_NEU/homr
+        candidate = Path(__file__).resolve().parents[3] / "homr"
+        if candidate.exists() and (candidate / "pyproject.toml").exists():
+            return candidate
+        return None
+
+    def _find_homr_in_repo_venv(self, repo_dir: Path) -> Optional[Path]:
+        """Find HOMR executable inside a repository-local virtual environment."""
+        candidates = [
+            repo_dir / ".venv" / "Scripts" / "homr.exe",
+            repo_dir / ".venv" / "Scripts" / "homr.cmd",
+            repo_dir / ".venv" / "Scripts" / "homr",
+            repo_dir / ".venv" / "bin" / "homr",
+        ]
+        return next((p for p in candidates if p.exists()), None)
 
     def _setup(self):
         """Verify that homr is installed and accessible."""
-        import shutil
-
-        # If homr_dir is set, we're using poetry run homr
+        # If homr_dir is set, resolve executable from repo venv or poetry run.
         if self.homr_dir:
             homr_dir_path = Path(self.homr_dir)
             if not homr_dir_path.exists():
@@ -60,24 +78,48 @@ class HomrModel(BaseOMRModel):
                 raise RuntimeError(
                     f"Not a valid HOMR repo (missing pyproject.toml): {self.homr_dir}"
                 )
-            logger.info(f"Using HOMR from: {self.homr_dir} (poetry run)")
-            return
 
-        # Check if homr executable exists in PATH
-        self.homr_executable = shutil.which(self.homr_path)
+            repo_homr = self._find_homr_in_repo_venv(homr_dir_path)
+            if repo_homr is not None:
+                self.homr_executable = str(repo_homr)
+                self.use_poetry = False
+                logger.info(f"Using HOMR executable: {self.homr_executable}")
+                return
 
-        if self.homr_executable is None:
+            if shutil.which("poetry"):
+                self.use_poetry = True
+                logger.info(f"Using HOMR from: {self.homr_dir} (poetry run)")
+                return
+
             raise RuntimeError(
-                f"homr executable not found at: {self.homr_path}\n"
-                "Install it with:\n"
-                "  git clone https://github.com/liebharc/homr\n"
-                "  cd homr\n"
-                "  poetry install --only main,gpu  # for GPU\n"
-                "  poetry install --only main      # for CPU\n"
-                "Or specify the correct path with homr_path parameter"
+                f"No HOMR executable found in {self.homr_dir}/.venv and poetry is not in PATH.\n"
+                "Install HOMR in its repo environment or install poetry."
             )
 
-        logger.info(f"homr executable found at: {self.homr_executable}")
+        # Check if homr executable exists in PATH first.
+        self.homr_executable = shutil.which(self.homr_path)
+
+        if self.homr_executable is not None:
+            logger.info(f"homr executable found at: {self.homr_executable}")
+            return
+
+        # Fallback: auto-detect sibling homr repository.
+        local_repo = self._detect_local_homr_repo()
+        if local_repo is not None:
+            self.homr_dir = str(local_repo)
+            logger.info(f"Auto-detected HOMR repo: {self.homr_dir}")
+            self._setup()
+            return
+
+        raise RuntimeError(
+            f"homr executable not found at: {self.homr_path}\n"
+            "Install it with:\n"
+            "  git clone https://github.com/liebharc/homr\n"
+            "  cd homr\n"
+            "  poetry install --only main,gpu  # for GPU\n"
+            "  poetry install --only main      # for CPU\n"
+            "Or specify the correct path with homr_path parameter"
+        )
 
     def _predict_impl(self, image: Image.Image, image_name: str = "image") -> str:
         """Run homr prediction on the image.
@@ -97,24 +139,26 @@ class HomrModel(BaseOMRModel):
             input_path = tmp_dir_path / "input.png"
             image.save(input_path)
 
-            # Build command based on whether we're using poetry run
+            # Build command based on whether we're using repo-local HOMR or PATH.
             if self.homr_dir:
-                # Use homr executable directly from the homr venv
-                homr_executable = Path(self.homr_dir) / ".venv" / "bin" / "homr"
-
-                if not homr_executable.exists():
+                if self.use_poetry:
+                    cmd = ["poetry", "run", "homr", str(input_path)]
+                    run_cwd = str(Path(self.homr_dir))
+                elif self.homr_executable:
+                    cmd = [self.homr_executable, str(input_path)]
+                    run_cwd = str(tmp_dir_path)
+                else:
                     raise RuntimeError(
-                        f"HOMR executable not found at: {homr_executable}\n"
-                        f"Install HOMR with:\n"
-                        f"  cd {self.homr_dir}\n"
-                        f"  poetry install --only main,gpu"
+                        "HOMR setup is incomplete: neither executable nor poetry mode is available."
                     )
 
-                cmd = [str(homr_executable), str(input_path)]
                 if self.force_cpu:
                     cmd.append("--force-cpu")
-                run_cwd = str(tmp_dir_path)
-                use_shell = False
+
+                # On Windows, .cmd entry points may require shell=True.
+                import sys
+
+                use_shell = sys.platform == "win32"
             else:
                 # Use direct homr command (from stored executable path)
                 cmd = [self.homr_executable, str(input_path)]
