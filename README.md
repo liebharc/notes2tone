@@ -53,17 +53,16 @@ poetry run homr <image_path>
 ```
 
 ### 5. Install Audiveris
-Windows: Download .msi from [releases](https://github.com/Audiveris/audiveris/releases)
-Linux: use install script to install localy or download .deb or use Flatpak from [Flathub](https://flathub.org/apps/org.audiveris.audiveris)
+- Windows: Download .msi from [releases](https://github.com/Audiveris/audiveris/releases)
+- Linux: use install script to install localy or download .deb or use Flatpak from [Flathub](https://flathub.org/apps/org.audiveris.audiveris)
  ```bash
  chmod +x audiveris_setup.sh
  ./audiveris_setup.sh
  ```
-macOS: Download .dmg from releases
-Build it yourselfe: Requires Java 11+ ([download here](https://adoptium.net/))
+- macOS: Download .dmg from releases
+- Build it yourselfe: Requires Java 11+ ([download here](https://adoptium.net/))
 
-
-### 5. Setup HuggingFace Authentication
+### 6. Setup HuggingFace Authentication
 
 Create `.env` file in notes2tone project root:
 ```
