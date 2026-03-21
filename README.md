@@ -149,3 +149,11 @@ nvtop
 - PRAIG/SMB dataset: https://huggingface.co/datasets/PRAIG/SMB
 - OeMeR: https://github.com/BreezeWhite/oemer
 - music21: http://web.mit.edu/music21/
+
+## License
+
+This repository is licensed under the MIT License.
+See the `LICENSE` file for details.
+
+This project also includes modified MIT-licensed code from `musicdiff`.
+Original project lineage and attribution are preserved in the source headers under `musicdiff/`.
