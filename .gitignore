@@ -8,12 +8,14 @@ __pycache__/
 
 # IDE
 .vscode/
+.idea/
 
 # Benchmarks Output
 benchmarks/debug/
 benchmarks/results/
 
 figures/
+generated/
 
 # Model outputs
 *.musicxml
