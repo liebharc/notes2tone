@@ -6,7 +6,7 @@
     <title>Notes2Tone - OMR Ergebnisse</title>
     <meta
       name="description"
-      content="Kurzuebersicht der Notes2Tone-Ergebnisse: Vergleich von Audiveris, Audiveris-Scaled, HOMR und OeMeR auf dem SMB-Datensatz."
+      content="Kurzübersicht der Notes2Tone-Ergebnisse: Vergleich von Audiveris, Audiveris-Scaled, HOMR und OeMeR auf dem SMB-Datensatz."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -22,10 +22,6 @@
       <div class="hero__glow hero__glow--right" aria-hidden="true"></div>
       <p class="tag">Notes2Tone</p>
       <h1>Open-Source OMR im direkten Benchmark</h1>
-      <p class="lead">
-        Wir vergleichen Audiveris, Audiveris-Scaled, HOMR und OeMeR auf dem
-        Sheet Music Benchmark (SMB) und zeigen kurz die wichtigsten Resultate.
-      </p>
       <div class="hero__stats">
         <article>
           <p class="kpi">685</p>
@@ -44,7 +40,7 @@
 
     <main>
       <section class="section reveal">
-        <h2>Setup in 20 Sekunden</h2>
+        <h2>Vergleichsgrundlage</h2>
         <div class="cards cards--three">
           <article class="card">
             <h3>Datensatz</h3>
@@ -63,8 +59,8 @@
           <article class="card">
             <h3>Bewertung</h3>
             <p>
-              OMR-NED als Distanzmass zwischen Vorhersage und Ground Truth,
-              ergaenzt durch Fehlertyp-Analysen.
+              OMR-NED als Distanzmaß zwischen Vorhersage und Ground Truth,
+              ergänzt durch Fehlertyp-Analysen.
             </p>
           </article>
         </div>
@@ -79,7 +75,7 @@
               Median OMR-NED: HOMR 0.243, Audiveris-Scaled 0.250, Audiveris
               0.321, OeMeR 0.715.
             </p>
-            <p class="accent">HOMR liegt vorn, OeMeR faellt klar zurueck.</p>
+            <p class="accent">HOMR liegt vorn, OeMeR fällt klar zurück.</p>
           </article>
           <article class="result">
             <h3>Drei-Modell Vergleich (n=453)</h3>
@@ -87,7 +83,7 @@
               Mit mehr schwierigen Pianoform-Samples steigen alle Werte:
               HOMR 0.603, Audiveris-Scaled 0.660, OeMeR 0.753.
             </p>
-            <p class="accent">Rangfolge bleibt stabil: HOMR vor Audiveris-Scaled vor OeMeR.</p>
+            <p class="accent">Leistungsrang bleibt stabil: HOMR &gt; Audiveris-Scaled &gt; OeMeR.</p>
           </article>
           <article class="result">
             <h3>Coverage</h3>
@@ -96,39 +92,106 @@
               Audiveris-Scaled 78.5 Prozent, HOMR 99.3 Prozent, OeMeR 84.8
               Prozent.
             </p>
-            <p class="accent">Upscaling macht Audiveris fuer deutlich mehr Seiten nutzbar.</p>
+            <p class="accent">Upscaling macht Audiveris für deutlich mehr Seiten nutzbar.</p>
           </article>
         </div>
       </section>
 
       <section class="section reveal">
         <h2>Ergebnisplots</h2>
+        <div class="button-row">
+          <a
+            class="btn"
+            href="https://drive.google.com/drive/folders/18XO5tjv0MXGixctVBkDpAScNc5XzjKLL?usp=sharing"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Alle Figures im Drive</a
+          >
+        </div>
+
+        <h3 class="plot-group-title">4 Modelle (n=104)</h3>
         <div class="figure-grid">
           <figure class="panel">
-            <img src="assets/ned_histograms.png" alt="Histogramme der OMR-NED Verteilungen" loading="lazy" />
-            <figcaption>
-              OMR-NED Verteilungen der vier Modelle auf den gemeinsamen Samples.
-            </figcaption>
+            <a
+              href="https://drive.google.com/file/d/1ZOCt3V-RCaB-HV5ivKQALlmt6cGlOBOi/view?usp=sharing"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="https://drive.google.com/thumbnail?id=1ZOCt3V-RCaB-HV5ivKQALlmt6cGlOBOi&sz=w2000"
+                alt="Summary Tabelle für 4 Modelle"
+                loading="lazy"
+              />
+            </a>
           </figure>
           <figure class="panel">
-            <img src="assets/error_types_heatmap.png" alt="Heatmap der Fehlertyp-Beitraege" loading="lazy" />
-            <figcaption>
-              Notenfehler dominieren bei allen Modellen, Profile unterscheiden
-              sich jedoch deutlich.
-            </figcaption>
+            <a
+              href="https://drive.google.com/file/d/1Il1zLpn2rfWqPF6xNQI0AyAaxi29tOPJ/view?usp=sharing"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="https://drive.google.com/thumbnail?id=1Il1zLpn2rfWqPF6xNQI0AyAaxi29tOPJ&sz=w2000"
+                alt="Histogramme für 4 Modelle"
+                loading="lazy"
+              />
+            </a>
           </figure>
           <figure class="panel">
-            <img src="assets/summary_table.png" alt="Zusammenfassung der Metriken als Tabelle" loading="lazy" />
-            <figcaption>
-              Kompakte Kennzahlen zu Median, Mittelwert, Streuung und Extremen.
-            </figcaption>
+            <a
+              href="https://drive.google.com/file/d/1fLX3U_kauehw_6m66fUwAjGOEwoSMeN0/view?usp=sharing"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="https://drive.google.com/thumbnail?id=1fLX3U_kauehw_6m66fUwAjGOEwoSMeN0&sz=w2000"
+                alt="Fehlertypen Heatmap für 4 Modelle"
+                loading="lazy"
+              />
+            </a>
+          </figure>
+        </div>
+
+        <h3 class="plot-group-title">3 Modelle (n=453)</h3>
+        <div class="figure-grid">
+          <figure class="panel">
+            <a
+              href="https://drive.google.com/file/d/1WbZxFN53CtI--ybt9qPu9ZW-1HjowUkz/view?usp=sharing"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="https://drive.google.com/thumbnail?id=1WbZxFN53CtI--ybt9qPu9ZW-1HjowUkz&sz=w2000"
+                alt="Summary Tabelle für 3 Modelle"
+                loading="lazy"
+              />
+            </a>
           </figure>
           <figure class="panel">
-            <img src="assets/top_flop_tables.png" alt="Top und Flop Beispiele" loading="lazy" />
-            <figcaption>
-              Beispiele zeigen, wo Systeme sehr gut funktionieren und wo sie
-              scheitern.
-            </figcaption>
+            <a
+              href="https://drive.google.com/file/d/15Gl9lllqKafTBELLMYJ2DGElCmEHHxe0/view?usp=sharing"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="https://drive.google.com/thumbnail?id=15Gl9lllqKafTBELLMYJ2DGElCmEHHxe0&sz=w2000"
+                alt="Histogramme für 3 Modelle"
+                loading="lazy"
+              />
+            </a>
+          </figure>
+          <figure class="panel">
+            <a
+              href="https://drive.google.com/file/d/1rnJ3oEf5cOnbNudkYjfrccrlvTaGiOlE/view?usp=sharing"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="https://drive.google.com/thumbnail?id=1rnJ3oEf5cOnbNudkYjfrccrlvTaGiOlE&sz=w2000"
+                alt="Fehlertypen Heatmap für 3 Modelle"
+                loading="lazy"
+              />
+            </a>
           </figure>
         </div>
       </section>
@@ -137,20 +200,20 @@
         <h2>Fazit</h2>
         <p>
           HOMR liefert im Benchmark die beste Gesamtleistung. Audiveris-Scaled
-          ist durch Upscaling ein praktischer Kompromiss mit deutlich hoeherer
+          ist durch Upscaling ein praktischer Kompromiss mit deutlich höherer
           Abdeckung als Audiveris. OeMeR zeigt in diesem Setup konsistent
-          schwaechere Ergebnisse.
+          schwächere Ergebnisse.
         </p>
         <p>
-          Wichtigster Befund fuer Folgearbeit: Die dominanten Fehlertypen sind
-          modellspezifisch. Verbesserungen sollten deshalb gezielt pro Modell
-          ansetzen statt mit einem globalen Fix.
+          Zentraler Befund für die Weiterarbeit: Fehlertypen sind
+          modellspezifisch. Verbesserungen sollten daher gezielt pro Modell
+          entwickelt werden.
         </p>
       </section>
     </main>
 
     <footer class="footer">
-      <p>Notes2Tone Projektseite | Stand: Maerz 2026</p>
+      <p>Notes2Tone Projektseite | Stand: März 2026</p>
     </footer>
   </body>
 </html>
