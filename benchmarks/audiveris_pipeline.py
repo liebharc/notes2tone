@@ -1,8 +1,6 @@
 import argparse
 import logging
 import shutil
-import subprocess
-import tempfile
 import zipfile
 from pathlib import Path
 from typing import Optional
@@ -52,47 +50,19 @@ def _copy_ground_truth(samples: list[dict], gt_dir: Path) -> None:
         (gt_dir / f"{sample_id}.krn").write_text(gt_text, encoding="utf-8")
 
 
-def _convert_audiveris_output_to_pred(output_dir: Path, pred_dir: Path) -> int:
+def _extract_audiveris_output_xml_to_pred(output_dir: Path, pred_dir: Path) -> int:
     pred_dir.mkdir(parents=True, exist_ok=True)
 
-    # Try hardcoded path first, then fall back to PATH
-    xml2hum_bin = Path("~/shared/notes2tone/benchmarks/converters/xml2hum").expanduser()
-    if not xml2hum_bin.exists():
-        xml2hum_found = shutil.which("xml2hum")
-        if xml2hum_found:
-            xml2hum_bin = Path(xml2hum_found)
-        else:
-            raise RuntimeError("xml2hum was not found. Please install humlib/humdrum tools or check the path.")
-
-    converted = 0
+    extracted = 0
     for mxl_path in sorted(output_dir.glob("*.mxl")):
-        temp_xml_path: Optional[Path] = None
         try:
             xml_content = _read_musicxml_from_mxl(mxl_path)
-            with tempfile.NamedTemporaryFile("w", suffix=".xml", encoding="utf-8", delete=False) as tmp_xml:
-                tmp_xml.write(xml_content)
-                temp_xml_path = Path(tmp_xml.name)
-
-            pred_path = pred_dir / f"{mxl_path.stem}.krn"
-            with pred_path.open("w", encoding="utf-8", newline="") as out_file:
-                result = subprocess.run(
-                    [str(xml2hum_bin), str(temp_xml_path)],
-                    stdout=out_file,
-                    stderr=subprocess.PIPE,
-                    text=True,
-                    check=False,
-                )
-
-            if result.returncode != 0:
-                raise RuntimeError(result.stderr.strip() or f"xml2hum failed with exit code {result.returncode}")
-
-            converted += 1
+            pred_path = pred_dir / f"{mxl_path.stem}.xml"
+            pred_path.write_text(xml_content, encoding="utf-8")
+            extracted += 1
         except Exception as exc:
             logger.warning(f"Skipping {mxl_path.name}: {exc}")
-        finally:
-            if temp_xml_path and temp_xml_path.exists():
-                temp_xml_path.unlink()
-    return converted
+    return extracted
 
 
 def run_pipeline(
@@ -111,8 +81,8 @@ def run_pipeline(
 
     if skip_prediction:
         logger.info("Skipping Audiveris prediction phase (--skip-prediction enabled)")
-        converted = _convert_audiveris_output_to_pred(audiveris_output, pred_dir)
-        logger.info(f"Converted {converted} .mxl files into {pred_dir}")
+        extracted = _extract_audiveris_output_xml_to_pred(audiveris_output, pred_dir)
+        logger.info(f"Extracted {extracted} MusicXML files into {pred_dir}")
     else:
         if not audiveris_path:
             raise ValueError("--audiveris-path is required when not using --skip-prediction")
@@ -127,10 +97,10 @@ def run_pipeline(
 
         samples = processor.process_dataset(dataset, limit=limit)
 
-        converted = _convert_audiveris_output_to_pred(audiveris_output, pred_dir)
+        extracted = _extract_audiveris_output_xml_to_pred(audiveris_output, pred_dir)
         _copy_ground_truth(samples, gt_dir)
 
-        logger.info(f"Converted {converted} .mxl files into {pred_dir}")
+        logger.info(f"Extracted {extracted} MusicXML files into {pred_dir}")
         logger.info(f"Copied {len(samples)} ground-truth files into {gt_dir}")
 
 
@@ -138,7 +108,7 @@ if __name__ == "__main__":
     load_dotenv()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-    parser = argparse.ArgumentParser(description="Run Audiveris on SMB and build pred/gt **kern folders")
+    parser = argparse.ArgumentParser(description="Run Audiveris on SMB and build pred (MusicXML) / gt (**kern) folders")
     parser.add_argument("--audiveris-path", help="Path to Audiveris executable (required unless --skip-prediction is set)")
     parser.add_argument("--audiveris-output", type=Path, default=Path("audiveris_output"))
     parser.add_argument("--benchmark-output", type=Path, default=Path("benchmarks/generated"))
@@ -146,7 +116,7 @@ if __name__ == "__main__":
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--hf-token", type=str, default=None)
     parser.add_argument("--clean", action="store_true", help="Delete old output folders before running")
-    parser.add_argument("--skip-prediction", action="store_true", help="Skip Audiveris prediction and only reconvert existing MXL files to kern")
+    parser.add_argument("--skip-prediction", action="store_true", help="Skip Audiveris prediction and only extract existing MXL files to MusicXML")
     parser.add_argument(
         "--audiveris-upscale-factor",
         type=float,
