@@ -46,6 +46,7 @@ class HomrModel(BaseOMRModel):
         self.homr_path = homr_path
         self.homr_dir = homr_dir
         self.force_cpu = force_cpu
+        self.homr_executable = None  # Will be set in _setup()
 
     def _setup(self):
         """Verify that homr is installed and accessible."""
@@ -64,9 +65,9 @@ class HomrModel(BaseOMRModel):
             return
 
         # Check if homr executable exists in PATH
-        homr_executable = shutil.which(self.homr_path)
+        self.homr_executable = shutil.which(self.homr_path)
 
-        if homr_executable is None:
+        if self.homr_executable is None:
             raise RuntimeError(
                 f"homr executable not found at: {self.homr_path}\n"
                 "Install it with:\n"
@@ -77,7 +78,7 @@ class HomrModel(BaseOMRModel):
                 "Or specify the correct path with homr_path parameter"
             )
 
-        logger.info(f"homr executable found at: {homr_executable}")
+        logger.info(f"homr executable found at: {self.homr_executable}")
 
     def _predict_impl(self, image: Image.Image, image_name: str = "image") -> str:
         """Run homr prediction on the image.
@@ -114,12 +115,17 @@ class HomrModel(BaseOMRModel):
                 if self.force_cpu:
                     cmd.append("--force-cpu")
                 run_cwd = str(tmp_dir_path)
+                use_shell = False
             else:
-                # Use direct homr command
-                cmd = [self.homr_path, str(input_path)]
+                # Use direct homr command (from stored executable path)
+                cmd = [self.homr_executable, str(input_path)]
                 if self.force_cpu:
                     cmd.append("--force-cpu")
                 run_cwd = str(tmp_dir_path)
+                # On Windows, CMD files need shell=True to execute properly
+                import sys
+
+                use_shell = sys.platform == "win32"
 
             # Execute homr
             logger.debug(f"Running command: {' '.join(cmd)} (cwd: {run_cwd})")
@@ -130,6 +136,7 @@ class HomrModel(BaseOMRModel):
                     text=True,
                     timeout=480,  # 8 minute timeout
                     cwd=run_cwd,
+                    shell=use_shell,
                 )
 
                 if result.returncode != 0:
@@ -151,9 +158,9 @@ class HomrModel(BaseOMRModel):
                     musicxml_content = f.read()
 
                 # Save MusicXML output
-                output_dir = Path("benchmarks/output/homr")
-                output_dir.mkdir(parents=True, exist_ok=True)
-                xml_path = output_dir / f"{image_name}.xml"
+                xml_output_dir = Path("benchmarks/output/homr/xml")
+                xml_output_dir.mkdir(parents=True, exist_ok=True)
+                xml_path = xml_output_dir / f"{image_name}.xml"
                 with open(xml_path, "w", encoding="utf-8") as f:
                     f.write(musicxml_content)
                 logger.info(f"Saved MusicXML output: {xml_path}")
@@ -166,7 +173,9 @@ class HomrModel(BaseOMRModel):
                     )
 
                     # Save **kern prediction
-                    kern_path = output_dir / f"{image_name}.kern"
+                    kern_output_dir = Path("benchmarks/output/homr/kern")
+                    kern_output_dir.mkdir(parents=True, exist_ok=True)
+                    kern_path = kern_output_dir / f"{image_name}.kern"
                     with open(kern_path, "w", encoding="utf-8") as f:
                         f.write(kern_output)
                     logger.info(f"Saved **kern prediction: {kern_path}")
