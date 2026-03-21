@@ -144,6 +144,11 @@ nvtop
 
 **OMR-NED:** Normalized Edit Distance (lower = better, 0.0 = perfect)
 
+## Paper
+
+- Download (PDF):
+  https://github.com/dasrinkana/notes2tone/releases/download/v0.1.0/notes2tone_Endbericht.pdf
+
 ## Acknowledgments
 
 - PRAIG/SMB dataset: https://huggingface.co/datasets/PRAIG/SMB

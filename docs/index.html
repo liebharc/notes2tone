@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="de">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Notes2Tone - OMR Ergebnisse</title>
+    <title>Notes2Tone - OMR Results</title>
     <meta
       name="description"
-      content="Kurzübersicht der Notes2Tone-Ergebnisse: Vergleich von Audiveris, Audiveris-Scaled, HOMR und OeMeR auf dem SMB-Datensatz."
+      content="Overview of Notes2Tone results: comparison of Audiveris, Audiveris-Scaled, HOMR, and OeMeR on the SMB dataset."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -21,7 +21,7 @@
       <div class="hero__glow hero__glow--left" aria-hidden="true"></div>
       <div class="hero__glow hero__glow--right" aria-hidden="true"></div>
       <p class="tag">Notes2Tone</p>
-      <h1>Open-Source OMR im direkten Benchmark</h1>
+      <h1>Open-Source OMR in Direct Benchmark Comparison</h1>
       <div class="hero__stats">
         <article>
           <p class="kpi">685</p>
@@ -29,87 +29,86 @@
         </article>
         <article>
           <p class="kpi">4</p>
-          <p class="label">Systemvarianten</p>
+          <p class="label">System variants</p>
         </article>
         <article>
           <p class="kpi">OMR-NED</p>
-          <p class="label">Hauptmetrik (niedriger besser)</p>
+          <p class="label">Primary metric (lower is better)</p>
         </article>
       </div>
     </header>
 
     <main>
       <section class="section reveal">
-        <h2>Vergleichsgrundlage</h2>
+        <h2>Comparison Setup</h2>
         <div class="cards cards--three">
           <article class="card">
-            <h3>Datensatz</h3>
+            <h3>Dataset</h3>
             <p>
-              SMB mit 685 Notenbildern in mehreren Textur-Kategorien und Ground
-              Truth im kern-Format.
+              SMB with 685 sheet music images across multiple texture categories
+              and ground truth in kern format.
             </p>
           </article>
           <article class="card">
-            <h3>Modelle</h3>
+            <h3>Models</h3>
             <p>
-              Audiveris, Audiveris-Scaled, HOMR und OeMeR. Audiveris-Scaled ist
-              Audiveris mit vorgeschaltetem Upscaling.
+              Audiveris, Audiveris-Scaled, HOMR, and OeMeR. Audiveris-Scaled is
+              Audiveris with pre-processing upscaling.
             </p>
           </article>
           <article class="card">
-            <h3>Bewertung</h3>
+            <h3>Evaluation</h3>
             <p>
-              OMR-NED als Distanzmaß zwischen Vorhersage und Ground Truth,
-              ergänzt durch Fehlertyp-Analysen.
+              OMR-NED as a distance metric between prediction and ground truth,
+              complemented by error-type analysis.
             </p>
           </article>
         </div>
       </section>
 
       <section class="section reveal">
-        <h2>Kernaussagen</h2>
+        <h2>Key Findings</h2>
         <div class="results-grid">
           <article class="result">
-            <h3>Vier-Modell Vergleich (n=104)</h3>
+            <h3>Four-model comparison (n=104)</h3>
             <p>
               Median OMR-NED: HOMR 0.243, Audiveris-Scaled 0.250, Audiveris
               0.321, OeMeR 0.715.
             </p>
-            <p class="accent">HOMR liegt vorn, OeMeR fällt klar zurück.</p>
+            <p class="accent">HOMR leads, while OeMeR clearly trails.</p>
           </article>
           <article class="result">
-            <h3>Drei-Modell Vergleich (n=453)</h3>
+            <h3>Three-model comparison (n=453)</h3>
             <p>
-              Mit mehr schwierigen Pianoform-Samples steigen alle Werte:
+              With more challenging Pianoform samples, all values increase:
               HOMR 0.603, Audiveris-Scaled 0.660, OeMeR 0.753.
             </p>
-            <p class="accent">Leistungsrang bleibt stabil: HOMR &gt; Audiveris-Scaled &gt; OeMeR.</p>
+            <p class="accent">Performance ranking remains stable: HOMR &gt; Audiveris-Scaled &gt; OeMeR.</p>
           </article>
           <article class="result">
             <h3>Coverage</h3>
             <p>
-              Erfolgreich verarbeitete SMB-Samples: Audiveris 29.3 Prozent,
-              Audiveris-Scaled 78.5 Prozent, HOMR 99.3 Prozent, OeMeR 84.8
-              Prozent.
+              Successfully processed SMB samples: Audiveris 29.3%,
+              Audiveris-Scaled 78.5%, HOMR 99.3%, OeMeR 84.8%.
             </p>
-            <p class="accent">Upscaling macht Audiveris für deutlich mehr Seiten nutzbar.</p>
+            <p class="accent">Upscaling makes Audiveris usable on significantly more pages.</p>
           </article>
         </div>
       </section>
 
       <section class="section reveal">
-        <h2>Ergebnisplots</h2>
+        <h2>Result Plots</h2>
         <div class="button-row">
           <a
             class="btn"
             href="https://drive.google.com/drive/folders/18XO5tjv0MXGixctVBkDpAScNc5XzjKLL?usp=sharing"
             target="_blank"
             rel="noopener noreferrer"
-            >Alle Figures im Drive</a
+            >All figures on Drive</a
           >
         </div>
 
-        <h3 class="plot-group-title">4 Modelle (n=104)</h3>
+        <h3 class="plot-group-title">4 Models (n=104)</h3>
         <div class="figure-grid">
           <figure class="panel">
             <a
@@ -119,7 +118,7 @@
             >
               <img
                 src="https://drive.google.com/thumbnail?id=1ZOCt3V-RCaB-HV5ivKQALlmt6cGlOBOi&sz=w2000"
-                alt="Summary Tabelle für 4 Modelle"
+                alt="Summary table for 4 models"
                 loading="lazy"
               />
             </a>
@@ -132,7 +131,7 @@
             >
               <img
                 src="https://drive.google.com/thumbnail?id=1Il1zLpn2rfWqPF6xNQI0AyAaxi29tOPJ&sz=w2000"
-                alt="Histogramme für 4 Modelle"
+                alt="Histograms for 4 models"
                 loading="lazy"
               />
             </a>
@@ -145,14 +144,14 @@
             >
               <img
                 src="https://drive.google.com/thumbnail?id=1fLX3U_kauehw_6m66fUwAjGOEwoSMeN0&sz=w2000"
-                alt="Fehlertypen Heatmap für 4 Modelle"
+                alt="Error-type heatmap for 4 models"
                 loading="lazy"
               />
             </a>
           </figure>
         </div>
 
-        <h3 class="plot-group-title">3 Modelle (n=453)</h3>
+        <h3 class="plot-group-title">3 Models (n=453)</h3>
         <div class="figure-grid">
           <figure class="panel">
             <a
@@ -162,7 +161,7 @@
             >
               <img
                 src="https://drive.google.com/thumbnail?id=1WbZxFN53CtI--ybt9qPu9ZW-1HjowUkz&sz=w2000"
-                alt="Summary Tabelle für 3 Modelle"
+                alt="Summary table for 3 models"
                 loading="lazy"
               />
             </a>
@@ -175,7 +174,7 @@
             >
               <img
                 src="https://drive.google.com/thumbnail?id=15Gl9lllqKafTBELLMYJ2DGElCmEHHxe0&sz=w2000"
-                alt="Histogramme für 3 Modelle"
+                alt="Histograms for 3 models"
                 loading="lazy"
               />
             </a>
@@ -188,7 +187,7 @@
             >
               <img
                 src="https://drive.google.com/thumbnail?id=1rnJ3oEf5cOnbNudkYjfrccrlvTaGiOlE&sz=w2000"
-                alt="Fehlertypen Heatmap für 3 Modelle"
+                alt="Error-type heatmap for 3 models"
                 loading="lazy"
               />
             </a>
@@ -197,23 +196,36 @@
       </section>
 
       <section class="section section--final reveal">
-        <h2>Fazit</h2>
+        <h2>Conclusion</h2>
         <p>
-          HOMR liefert im Benchmark die beste Gesamtleistung. Audiveris-Scaled
-          ist durch Upscaling ein praktischer Kompromiss mit deutlich höherer
-          Abdeckung als Audiveris. OeMeR zeigt in diesem Setup konsistent
-          schwächere Ergebnisse.
+          HOMR delivers the best overall benchmark performance.
+          Audiveris-Scaled is a practical compromise with significantly higher
+          coverage than Audiveris. In this setup, OeMeR shows consistently
+          weaker results.
         </p>
         <p>
-          Zentraler Befund für die Weiterarbeit: Fehlertypen sind
-          modellspezifisch. Verbesserungen sollten daher gezielt pro Modell
-          entwickelt werden.
+          Key takeaway for future work: error profiles are model-specific, so
+          improvements should be designed per model rather than with a single
+          global fix.
         </p>
+      </section>
+
+      <section class="section reveal">
+        <h2>Paper</h2>
+        <div class="button-row">
+          <a
+            class="btn"
+            href="https://github.com/dasrinkana/notes2tone/releases/download/v0.1.0/notes2tone_Endbericht.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Download paper (PDF)</a
+          >
+        </div>
       </section>
     </main>
 
     <footer class="footer">
-      <p>Notes2Tone Projektseite | Stand: März 2026</p>
+      <p>Notes2Tone project page | Updated: March 2026</p>
     </footer>
   </body>
 </html>
