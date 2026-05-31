@@ -10,9 +10,10 @@ dependencies = [
     "pillow>=10.0.0",
     "tqdm>=4.66.0",
     "python-dotenv>=1.0.0",
-    "music21>=8.3.0,<10.0.0",
+    "music21==9.7.1",
     "oemer>=0.1.8",
     "onnxruntime-gpu==1.19.2",
+    "converter21==3.5.0"
 ]
 
 [build-system]
