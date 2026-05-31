@@ -13,6 +13,7 @@ __pycache__/
 # Benchmarks Output
 benchmarks/debug/
 benchmarks/results/
+benchmarks/output/
 
 figures/
 generated/
